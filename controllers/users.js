@@ -26,9 +26,10 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+      } else {
+        res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
       }
-      return res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
     });
 };
 
@@ -37,14 +38,13 @@ module.exports.updateProfile = (req, res) => {
 
   User.findByIdAndUpdate(req.user._id, { name, about })
     .then((user) => res.send(user))
-    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
       } else if (err.name === 'CastError') {
-        return res.status(404).send({ message: 'Пользователь с указанным id не найден' });
+        res.status(404).send({ message: 'Пользователь с указанным id не найден' });
       } else {
-        return res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
+        res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
       }
     });
 };
@@ -54,14 +54,13 @@ module.exports.updateAvatar = (req, res) => {
 
   User.findByIdAndUpdate(req.user._id, { avatar })
     .then((user) => res.send({ avatar: user.avatar }))
-    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара' });
       } else if (err.name === 'CastError') {
-        return res.status(404).send({ message: 'Пользователь с указанным id не найден' });
+        res.status(404).send({ message: 'Пользователь с указанным id не найден' });
       } else {
-        return res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
+        res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
       }
     });
 };

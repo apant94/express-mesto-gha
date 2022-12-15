@@ -12,9 +12,10 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные при создании карточки' });
+        res.status(400).send({ message: 'Переданы некорректные данные при создании карточки' });
+      } else {
+        res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
       }
-      return res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
     });
 };
 
@@ -23,9 +24,10 @@ module.exports.deleteCardById = (req, res) => {
     .then(() => res.send('Карточка удалена'))
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(404).send({ message: 'Карточка с указанным id не найдена' });
+        res.status(404).send({ message: 'Карточка с указанным id не найдена' });
+      } else {
+        res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
       }
-      return res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
     });
 };
 
@@ -41,9 +43,9 @@ module.exports.likeCard = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные при лайке' });
       } else if (err.name === 'CastError') {
-        return res.status(404).send({ message: 'Карточка с указанным id не найдена' });
+        res.status(404).send({ message: 'Карточка с указанным id не найдена' });
       } else {
-        return res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
+        res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
       }
     });
 };
@@ -60,9 +62,9 @@ module.exports.dislikeCard = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные при снятии лайка' });
       } else if (err.name === 'CastError') {
-        return res.status(404).send({ message: 'Карточка с указанным id не найдена' });
+        res.status(404).send({ message: 'Карточка с указанным id не найдена' });
       } else {
-        return res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
+        res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
       }
     });
 };
