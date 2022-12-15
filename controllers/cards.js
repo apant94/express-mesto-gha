@@ -21,7 +21,12 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCardById = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then(() => res.send('Карточка удалена'))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err.message}` }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(404).send({ message: 'Карточка с указанным id не найдена' });
+      }
+      return res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
+    });
 };
 
 module.exports.likeCard = (req, res) => {
@@ -31,7 +36,16 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.send(card))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err.message}` }));
+    // eslint-disable-next-line consistent-return
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные при лайке' });
+      } else if (err.name === 'CastError') {
+        return res.status(404).send({ message: 'Карточка с указанным id не найдена' });
+      } else {
+        return res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
+      }
+    });
 };
 
 module.exports.dislikeCard = (req, res) => {
@@ -41,5 +55,14 @@ module.exports.dislikeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.send(card))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err.message}` }));
+    // eslint-disable-next-line consistent-return
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные при снятии лайка' });
+      } else if (err.name === 'CastError') {
+        return res.status(404).send({ message: 'Карточка с указанным id не найдена' });
+      } else {
+        return res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
+      }
+    });
 };
