@@ -38,7 +38,6 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.send(card))
-    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные при лайке' });
@@ -57,7 +56,6 @@ module.exports.dislikeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.send(card))
-    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные при снятии лайка' });

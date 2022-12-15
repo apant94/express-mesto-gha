@@ -12,16 +12,16 @@ module.exports.getUserById = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(404).send({ message: 'Пользователь с указанным id не найден' });
+        res.status(404).send({ message: 'Пользователь с указанным id не найден' });
+      } else {
+        res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
       }
-      return res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
     });
 };
 
 module.exports.createUser = (req, res) => {
   console.log(req.user._id);
   const { name, about, avatar } = req.body;
-  // eslint-disable-next-line no-undef
   User.create({ name, about, avatar })
     .then((user) => res.send(user))
     .catch((err) => {
