@@ -43,7 +43,7 @@ module.exports.updateProfile = (req, res) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { name, about })
-    .then((user) => res.send(user))
+    .then((user) => res.send({ name: user.name, about: user.about }))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении профиля' });
