@@ -1,7 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const auth = require('./middlewares/auth');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
+const { createUser, login } = require('./controllers/users');
 
 const NOT_FOUND_ERROR_CODE = 404;
 
@@ -18,6 +20,9 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.json());
+
+app.post('/signin', auth, login);
+app.post('/signup', createUser);
 app.use(userRouter);
 app.use(cardRouter);
 app.use('*', (req, res) => {

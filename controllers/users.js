@@ -29,6 +29,12 @@ module.exports.getUserById = (req, res) => {
     });
 };
 
+module.exports.getCurrentUser = (req, res) => {
+  User.findById(req.user._id)
+    .then((user) => res.send(user))
+    .catch((err) => res.status(INTENTAL_SERVER_ERROR_CODE).send({ message: `Произошла ошибка: ${err.message}` }));
+};
+
 module.exports.createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
