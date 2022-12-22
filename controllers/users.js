@@ -1,8 +1,11 @@
 /* eslint-disable no-restricted-globals */
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const NOT_FOUND_ERROR_CODE = 404;
 const BAD_REQUEST_ERROR_CODE = 400;
+const UNAUTHORIZED_ERROR_CODE = 401;
 const INTENTAL_SERVER_ERROR_CODE = 500;
 
 module.exports.getUsers = (req, res) => {
@@ -27,8 +30,17 @@ module.exports.getUserById = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -36,6 +48,32 @@ module.exports.createUser = (req, res) => {
       } else {
         res.status(INTENTAL_SERVER_ERROR_CODE).send({ message: `Произошла ошибка: ${err.message}` });
       }
+    });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        return Promise.reject(new Error('Неправильные почта или пароль'));
+      }
+      return bcrypt.compare(password, user.password);
+    })
+    // eslint-disable-next-line consistent-return
+    .then((matched) => {
+      if (!matched) {
+        return Promise.reject(new Error('Неправильные почта или пароль'));
+      }
+      res.send({ message: 'Вы авторизованы!' });
+    })
+    // Проверить, передается ли сюда user??
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      res.send({ token });
+    })
+    .catch((err) => {
+      res.status(UNAUTHORIZED_ERROR_CODE).send({ message: `Произошла ошибка: ${err.message}` });
     });
 };
 
