@@ -1,6 +1,6 @@
 const Card = require('../models/card');
-
-const NOT_FOUND_ERROR_CODE = 404;
+const NotFoundError = require('../errors/NotFoundError');
+// const NOT_FOUND_ERROR_CODE = 404;
 const BAD_REQUEST_ERROR_CODE = 400;
 const INTENTAL_SERVER_ERROR_CODE = 500;
 
@@ -37,7 +37,7 @@ module.exports.deleteCardById = (req, res) => {
       if (err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR_CODE).send({ message: 'Переданы некорректные данные при удалении карточки' });
       } else if (err.message === 'NotFoundError') {
-        res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка по данному id не найдена' });
+        throw new NotFoundError('Карточка по данному id не найдена');
       } else {
         res.status(INTENTAL_SERVER_ERROR_CODE).send({ message: `Произошла ошибка: ${err.message}` });
       }
@@ -56,7 +56,7 @@ module.exports.likeCard = (req, res) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR_CODE).send({ message: 'Переданы некорректные данные при лайке' });
       } else if (err.message === 'NotFoundError') {
-        res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка с указанным id не найдена' });
+        throw new NotFoundError('Карточка по данному id не найдена');
       } else {
         res.status(INTENTAL_SERVER_ERROR_CODE).send({ message: `Произошла ошибка: ${err.message}` });
       }
@@ -75,7 +75,7 @@ module.exports.dislikeCard = (req, res) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR_CODE).send({ message: 'Переданы некорректные данные при снятии лайка' });
       } else if (err.message === 'NotFoundError') {
-        res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка с указанным id не найдена' });
+        throw new NotFoundError('Карточка по данному id не найдена');
       } else {
         res.status(INTENTAL_SERVER_ERROR_CODE).send({ message: `Произошла ошибка: ${err.message}` });
       }

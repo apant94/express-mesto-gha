@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 
-// eslint-disable-next-line consistent-return
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
@@ -10,7 +9,7 @@ module.exports = (req, res, next) => {
       .send({ message: 'Необходима авторизация' });
   }
 
-  const token = authorization.replace('Bearer', '');
+  const token = authorization.replace('Bearer ', '');
   let payload;
 
   try {
@@ -21,5 +20,5 @@ module.exports = (req, res, next) => {
 
   req.user = payload;
 
-  next();
+  return next();
 };

@@ -72,6 +72,7 @@ module.exports.login = (req, res) => {
       if (!matched) {
         return Promise.reject(new Error('Неправильные почта или пароль'));
       }
+      console.log(user);
       return user;
     })
     .then((user) => {
