@@ -6,13 +6,15 @@ const INTENTAL_SERVER_ERROR_CODE = 500;
 
 module.exports.getCards = (req, res) => {
   Card.find({})
+    .populate(['owner', 'likes'])
     .then((cards) => res.send({ data: cards }))
     .catch((err) => res.status(INTENTAL_SERVER_ERROR_CODE).send({ message: `Произошла ошибка: ${err.message}` }));
 };
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
-  Card.create({ name, link, owner: req.user._id })
+  const owner = req.user._id;
+  Card.create({ name, link, owner })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -25,7 +27,7 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCardById = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .orFail(new Error('NotFoundError'))
+    .orFail(new NotFoundError('Карточка по данному id не найдена'))
     .then((card) => {
       if (card.owner._id !== req.user.cardId) {
         throw new Error('Невозможно удалить карточку другого пользователя');
@@ -50,6 +52,7 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
+    .populate(['owner', 'likes'])
     .orFail(new Error('NotFoundError'))
     .then((card) => res.send(card))
     .catch((err) => {
@@ -69,6 +72,7 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
+    .populate(['owner', 'likes'])
     .orFail(new Error('NotFoundError'))
     .then((card) => res.send(card))
     .catch((err) => {

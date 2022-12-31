@@ -4,8 +4,9 @@ const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const NotFoundError = require('./errors/NotFoundError');
 
-const NOT_FOUND_ERROR_CODE = 404;
+const INTENTAL_SERVER_ERROR_CODE = 500;
 
 const { PORT = 3000 } = process.env;
 
@@ -20,13 +21,14 @@ app.post('/signin', login);
 app.use(auth);
 app.use(userRouter);
 app.use(cardRouter);
-app.use('*', (req, res) => {
-  res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Указанный путь не найден' });
+app.use('*', () => {
+  throw new NotFoundError('Указанный путь не найден');
 });
-// app.use((err, req, res, next) => {
-//   res.status(500).send({ message: 'На сервере произошла ошибка' });
-//   next(err);
-// });
+app.use((err, req, res, next) => {
+  const { status = INTENTAL_SERVER_ERROR_CODE, message } = err;
+  res.status(status).send({ message: status === INTENTAL_SERVER_ERROR_CODE ? 'На сервере произошла ошибка' : message });
+  next();
+});
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
