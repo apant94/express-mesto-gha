@@ -4,13 +4,7 @@ const User = require('../models/user');
 
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
-const ForbiddenError = require('../errors/ForbiddenError');
 const UnauthorizedError = require('../errors/UnauthorizedError');
-
-const NOT_FOUND_ERROR_CODE = 404;
-const BAD_REQUEST_ERROR_CODE = 400;
-const UNAUTHORIZED_ERROR_CODE = 401;
-const INTENTAL_SERVER_ERROR_CODE = 500;
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -40,7 +34,7 @@ module.exports.getCurrentUser = (req, res, next) => {
     .catch((err) => next(err));
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -55,14 +49,14 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(BAD_REQUEST_ERROR_CODE).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
       } else {
-        res.status(INTENTAL_SERVER_ERROR_CODE).send({ message: `Произошла ошибка: ${err.message}` });
+        next(err);
       }
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -70,34 +64,38 @@ module.exports.login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
-      res.status(UNAUTHORIZED_ERROR_CODE).send({ message: `Произошла ошибка: ${err.message}` });
+      if (err.code === 11000) {
+        next(new UnauthorizedError(err.message));
+      } else {
+        next(err);
+      }
     });
 };
 
-module.exports.updateProfile = (req, res) => {
+module.exports.updateProfile = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        res.status(BAD_REQUEST_ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении профиля' });
+        next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
       } else {
-        res.status(INTENTAL_SERVER_ERROR_CODE).send({ message: `Произошла ошибка: ${err.message}` });
+        next(err);
       }
     });
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => res.send({ avatar: user.avatar }))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        res.status(BAD_REQUEST_ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении аватара' });
+        next(new BadRequestError('Переданы некорректные данные при обновлении аватара'));
       } else {
-        res.status(INTENTAL_SERVER_ERROR_CODE).send({ message: `Произошла ошибка: ${err.message}` });
+        next(err);
       }
     });
 };
