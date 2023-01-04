@@ -2,36 +2,42 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
+const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
+const ForbiddenError = require('../errors/ForbiddenError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
+
 const NOT_FOUND_ERROR_CODE = 404;
 const BAD_REQUEST_ERROR_CODE = 400;
 const UNAUTHORIZED_ERROR_CODE = 401;
 const INTENTAL_SERVER_ERROR_CODE = 500;
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => res.status(INTENTAL_SERVER_ERROR_CODE).send({ message: `Произошла ошибка: ${err.message}` }));
+    .catch(next);
 };
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   User.findById(req.params.userId)
-    .orFail(new Error('NotFoundError'))
+    .orFail(new NotFoundError('Пользователь с указанным id не найден'))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST_ERROR_CODE).send({ message: 'Указан невалидный id' });
+        next(new BadRequestError('Указан невалидный id'));
       } else if (err.message === 'NotFoundError') {
-        res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь с указанным id не найден' });
+        next(new NotFoundError('Пользователь с указанным id не найден'));
       } else {
-        res.status(INTENTAL_SERVER_ERROR_CODE).send({ message: `Произошла ошибка: ${err.message}` });
+        next(err);
       }
     });
 };
 
-module.exports.getCurrentUser = (req, res) => {
+module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
+    .orFail(new NotFoundError('Пользователь с указанным id не найден'))
     .then((user) => res.send(user))
-    .catch((err) => res.status(INTENTAL_SERVER_ERROR_CODE).send({ message: `Произошла ошибка: ${err.message}` }));
+    .catch((err) => next(err));
 };
 
 module.exports.createUser = (req, res) => {
