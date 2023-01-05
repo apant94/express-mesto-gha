@@ -19,8 +19,6 @@ module.exports.getUserById = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Указан невалидный id'));
-      } else if (err.message === 'NotFoundError') {
-        next(new NotFoundError('Пользователь с указанным id не найден'));
       } else {
         next(err);
       }
@@ -50,6 +48,8 @@ module.exports.createUser = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
+      } else if (err.code === 11000) {
+        next(new UnauthorizedError(err.message));
       } else {
         next(err);
       }
@@ -63,13 +63,7 @@ module.exports.login = (req, res, next) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
       res.send({ token });
     })
-    .catch((err) => {
-      if (err.code === 11000) {
-        next(new UnauthorizedError(err.message));
-      } else {
-        next(err);
-      }
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.updateProfile = (req, res, next) => {
@@ -78,7 +72,7 @@ module.exports.updateProfile = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
       } else {
         next(err);
@@ -92,7 +86,7 @@ module.exports.updateAvatar = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => res.send({ avatar: user.avatar }))
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении аватара'));
       } else {
         next(err);

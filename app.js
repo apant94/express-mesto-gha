@@ -24,19 +24,19 @@ app.post('/signup', celebrate({
     name: Joi.string().min(2).max(20),
     avatar: Joi.string().regex(/http[s]?:\/\/([\w.]+\/?)\S*/),
     about: Joi.string().min(2).max(30),
-  }).unknown(true),
+  }),
 }), createUser);
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
-  }).unknown(true),
+  }),
 }), login);
 app.use(auth);
-app.use(userRouter);
-app.use(cardRouter);
-app.use('*', () => {
-  throw new NotFoundError('Указанный путь не найден');
+app.use('/users', userRouter);
+app.use('/cards', cardRouter);
+app.use('*', (next) => {
+  next(new NotFoundError('Указанный путь не найден'));
 });
 app.use((err, req, res, next) => {
   const { status = INTENTAL_SERVER_ERROR_CODE, message } = err;
@@ -44,6 +44,4 @@ app.use((err, req, res, next) => {
   next();
 });
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
-});
+app.listen(PORT);

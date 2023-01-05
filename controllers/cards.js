@@ -37,8 +37,6 @@ module.exports.deleteCardById = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Переданы некорректные данные при удалении карточки'));
-      } else if (err.message === 'NotFoundError') {
-        next(new NotFoundError('Карточка по данному id не найдена'));
       } else {
         next(err);
       }
@@ -55,7 +53,7 @@ module.exports.likeCard = (req, res, next) => {
     .orFail(new NotFoundError('Карточка с таким id не найдена'))
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError') {
         next(new BadRequestError('Переданы некорректные данные при лайке'));
       } else if (err.message === 'NotFoundError') {
         next(new NotFoundError('Карточка по данному id не найдена'));
@@ -75,7 +73,7 @@ module.exports.dislikeCard = (req, res, next) => {
     .orFail(new NotFoundError('Карточка с таким id не найдена'))
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError') {
         next(new BadRequestError('Переданы некорректные данные при снятии лайка'));
       } else if (err.message === 'NotFoundError') {
         next(new NotFoundError('Карточка по данному id не найдена'));
