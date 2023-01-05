@@ -5,16 +5,16 @@ const {
 } = require('../controllers/users');
 
 userRouter.get('/', getUsers);
+userRouter.get('/me', getCurrentUser);
 userRouter.get('/:userId', celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().alphanum().length(24).required(),
+    userId: Joi.string().hex().length(24).required(),
   }).unknown(true),
 }), getUserById);
-userRouter.get('/me', getCurrentUser);
 userRouter.patch('/me', celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(20),
-    about: Joi.string().min(2).max(30),
+    name: Joi.string().min(2).max(20).required(),
+    about: Joi.string().min(2).max(30).required(),
   }),
 }), updateProfile);
 userRouter.patch('/me/avatar', celebrate({

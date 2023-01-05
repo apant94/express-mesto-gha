@@ -20,7 +20,7 @@ app.use(express.json());
 app.post('/signup', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
+    password: Joi.string().required(),
     name: Joi.string().min(2).max(20),
     avatar: Joi.string().regex(/http[s]?:\/\/([\w.]+\/?)\S*/),
     about: Joi.string().min(2).max(30),
@@ -29,7 +29,7 @@ app.post('/signup', celebrate({
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
+    password: Joi.string().required(),
   }),
 }), login);
 app.use(auth);
