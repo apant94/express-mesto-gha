@@ -4,7 +4,7 @@ const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-const { centralizeError } = require('./middlewares/centralizeError');
+const { rootErrorHandler } = require('./middlewares/rootErrorHandler');
 const { validateSignUp, validateSignIn } = require('./middlewares/validate');
 const NotFoundError = require('./errors/NotFoundError');
 
@@ -24,6 +24,6 @@ app.use('/cards', cardRouter);
 app.use('*', (next) => {
   next(new NotFoundError('Указанный путь не найден'));
 });
-app.use(centralizeError);
+app.use(rootErrorHandler);
 
 app.listen(PORT);

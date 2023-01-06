@@ -1,11 +1,13 @@
 const { celebrate, Joi } = require('celebrate');
 
+const regex = /http[s]?:\/\/([\w.]+\/?)\S*/;
+
 module.exports.validateSignUp = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required(),
     name: Joi.string().min(2).max(20),
-    avatar: Joi.string().regex(/http[s]?:\/\/([\w.]+\/?)\S*/),
+    avatar: Joi.string().regex(regex),
     about: Joi.string().min(2).max(30),
   }),
 });
@@ -32,14 +34,14 @@ module.exports.validateUpdateProfile = celebrate({
 
 module.exports.validateUpdateAvatar = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().regex(/http[s]?:\/\/([\w.]+\/?)\S*/).required(),
+    avatar: Joi.string().regex(regex).required(),
   }),
 });
 
 module.exports.validateCreateCard = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
-    link: Joi.string().regex(/http[s]?:\/\/([\w.]+\/?)\S*/).required(),
+    link: Joi.string().regex(regex).required(),
   }),
 });
 
